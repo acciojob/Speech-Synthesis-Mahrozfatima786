@@ -35,71 +35,71 @@
   const options = document.querySelectorAll('[type="range"], [name="text"]');
   const speakButton = document.querySelector('#speak');
   const stopButton = document.querySelector('#stop');
-const msg = new SpeechSynthesisUtterance();
-let voices = [];
+(function() {
+  const msg = new SpeechSynthesisUtterance();
+  let voices = [];
 
-const voicesDropdown = document.querySelector('[name="voice"]');
-const rateInput = document.querySelector('[name="rate"]');
-const pitchInput = document.querySelector('[name="pitch"]');
-const textInput = document.querySelector('[name="text"]');
-const speakButton = document.querySelector('#speak');
-const stopButton = document.querySelector('#stop');
+  const voicesDropdown = document.querySelector('[name="voice"]');
+  const rateInput = document.querySelector('[name="rate"]');
+  const pitchInput = document.querySelector('[name="pitch"]');
+  const textInput = document.querySelector('[name="text"]');
+  const speakButton = document.querySelector('#speak');
+  const stopButton = document.querySelector('#stop');
 
-function populateVoices() {
-  voices = speechSynthesis.getVoices();
-  voicesDropdown.innerHTML = '';
-  voices.forEach((voice, index) => {
-    const option = document.createElement('option');
-    option.textContent = `${voice.name} (${voice.lang})`;
-    option.value = index;
-    voicesDropdown.appendChild(option);
+  function populateVoices() {
+    voices = speechSynthesis.getVoices();
+    voicesDropdown.innerHTML = '';
+    voices.forEach((voice, index) => {
+      const option = document.createElement('option');
+      option.textContent = `${voice.name} (${voice.lang})`;
+      option.value = index;
+      voicesDropdown.appendChild(option);
+    });
+  }
+
+  speechSynthesis.onvoiceschanged = populateVoices;
+  populateVoices();
+
+  function speakText() {
+    if (!textInput.value.trim()) {
+      alert('Please enter text to speak!');
+      return;
+    }
+
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel();
+    }
+
+    msg.text = textInput.value;
+
+    const selectedVoice = voices[voicesDropdown.value];
+    if (selectedVoice) msg.voice = selectedVoice;
+
+    msg.rate = parseFloat(rateInput.value);
+    msg.pitch = parseFloat(pitchInput.value);
+
+    speechSynthesis.speak(msg);
+  }
+
+  function stopSpeech() {
+    if (speechSynthesis.speaking) speechSynthesis.cancel();
+  }
+
+  voicesDropdown.addEventListener('change', () => {
+    if (speechSynthesis.speaking) speakText();
   });
-}
 
-speechSynthesis.onvoiceschanged = populateVoices;
-populateVoices();
+  rateInput.addEventListener('input', () => {
+    if (speechSynthesis.speaking) speakText();
+  });
 
-// Speak function
-function speakText() {
-  if (!textInput.value.trim()) {
-    alert('Please enter text to speak!');
-    return;
-  }
+  pitchInput.addEventListener('input', () => {
+    if (speechSynthesis.speaking) speakText();
+  });
 
-  if (speechSynthesis.speaking) {
-    speechSynthesis.cancel(); // Stop current speech before starting new
-  }
-
-  msg.text = textInput.value;
-
-  const selectedVoice = voices[voicesDropdown.value];
-  if (selectedVoice) msg.voice = selectedVoice;
-
-  msg.rate = parseFloat(rateInput.value);
-  msg.pitch = parseFloat(pitchInput.value);
-
-  speechSynthesis.speak(msg);
-}
-function stopSpeech() {
-  if (speechSynthesis.speaking) {
-    speechSynthesis.cancel();
-  }
-}
-
-voicesDropdown.addEventListener('change', () => {
-  if (speechSynthesis.speaking) {
-    speakText();
-  }
-});
-
-rateInput.addEventListener('input', () => {
-  if (speechSynthesis.speaking) speakText();
-});
-pitchInput.addEventListener('input', () => {
-  if (speechSynthesis.speaking) speakText();
-});
-speakButton.addEventListener('click', speakText);
-stopButton.addEventListener('click', stopSpeech);
+  speakButton.addEventListener('click', speakText);
+  stopButton.addEventListener('click', stopSpeech);
+})();
 
   //Your code goes here
 </script>
